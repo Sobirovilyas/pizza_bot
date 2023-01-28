@@ -2,8 +2,7 @@ from telebot import TeleBot
 from telebot.types import KeyboardButton, ReplyKeyboardMarkup
 import sqlite3
 from constants import get_products_query, create_new_user_query
-from utils import MenuStack
-
+from utils import MenuStack, check_phone_number, check_address
 
 TOKEN = '5943242364:AAEDa7ko4pgcCKnzSOw7WdvU8eYMH8OWD6M'
 
@@ -83,7 +82,7 @@ def get_user_details_keyboard(chat_id):
     else:
         phone_exists = True
 
-    if not check_addess(chat_id):
+    if not check_address(chat_id):
         get_address_button = KeyboardButton("Ввести адрес")
         keyboard.add(get_address_button)
     else:
@@ -115,7 +114,7 @@ def start_handler(message):
     create_user(chat_id)
 
     reply = "Вас приветствует бот доставки пиццы."
-    bot.reply_to(message, reply, reply_markup=get_user_details_keyboard())
+    bot.reply_to(message, reply, reply_markup=get_user_details_keyboard(chat_id))
 
 
 @bot.message_handler(func=lambda message: message.text == 'Меню')
