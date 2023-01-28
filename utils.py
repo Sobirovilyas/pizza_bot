@@ -20,7 +20,7 @@ class MenuStack:
 
 
 from constants import (get_address_sql,
-                        get_phone_number_sql)
+                       get_phone_number_sql, set_integer_flag_sql, get_integer_flag_sql, update_user_filed_sql)
 import sqlite3
 
 
@@ -31,6 +31,7 @@ def check_phone_number(chat_id):
         cursor = conn.cursor()
 
         cursor.execute(sql)
+        conn.commit()
         if cursor.rowcount < 1:
             return False
         return True
@@ -46,12 +47,43 @@ def check_address(chat_id):
         cursor = conn.cursor()
 
         cursor.execute(sql)
+        conn.commit()
         if cursor.rowcount < 1:
             return False
         return True
     except Exception as e:
         print("Database error")
         print(e)
+
+
+def set_integer_flag(value, column_name, table_name, chat_id):
+    sql = set_integer_flag_sql(value, column_name, table_name, chat_id)
+
+    conn = sqlite3.connect("pizza_database.db")
+    cursor = conn.cursor()
+    cursor.execute(sql)
+    conn.commit()
+
+
+def get_integer_flag(column_name, table_name, chat_id):
+    sql = get_integer_flag_sql(column_name, table_name, chat_id)
+    conn = sqlite3.connect("pizza_database.db")
+    cursor = conn.cursor()
+    cursor.execute(sql)
+    conn.commit()
+
+    flag = cursor.fetchall()[0][0]
+
+    return flag
+
+
+def update_user_filed(chat_id, filed_name, value):
+    sql = update_user_filed_sql(chat_id, filed_name, value)
+
+    conn = sqlite3.connect("pizza_database.db")
+    cursor = conn.cursor()
+    cursor.execute(sql)
+    conn.commit()
 
 
 if __name__ == '__main__':
