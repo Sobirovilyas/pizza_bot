@@ -94,13 +94,6 @@ def update_address_number(message):
                          "Введите адрес:")
 
 
-@bot.message_handler(content_types=['text'])
-def random_message_handler(message):
-    chat_id = message.chat.id
-    create_user(chat_id)
-    check_phone_if_yes_update(chat_id, message)
-    check_address_if_yes_update(chat_id, message)
-
 def check_phone_if_yes_update(chat_id, message):
     if get_integer_flag(column_name='phone_being_entered',
                         table_name='user',
@@ -156,7 +149,7 @@ def create_user(chat_id):
         print(e)
 
 
-@bot.message_handler(commands=['start'])
+@bot.message_handler(commands=["start"])
 def start_handler(message):
     chat_id = message.chat.id
 
@@ -175,8 +168,17 @@ def menu_handler(message):
 
 @bot.message_handler(func=lambda message: message.text == '<< Назад')
 def back_handler(message):
-    menu_to_go_back = stack.pop()
+    stack.pop() # Delete this menu
+    menu_to_go_back = stack.top() # fetch prev menu
     bot.send_message(message.chat.id, "Предидущее меню:", reply_markup=menu_to_go_back)
+
+
+@bot.message_handler(content_types=['text'])
+def random_message_handler(message):
+    chat_id = message.chat.id
+    create_user(chat_id)
+    check_phone_if_yes_update(chat_id, message)
+    check_address_if_yes_update(chat_id, message)
 
 
 #
