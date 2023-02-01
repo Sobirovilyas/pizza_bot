@@ -172,6 +172,13 @@ def back_handler(message):
     menu_to_go_back = stack.top() # fetch prev menu
     bot.send_message(message.chat.id, "Предидущее меню:", reply_markup=menu_to_go_back)
 
+@bot.message_handler(
+    func=lambda message: message.text in get_product_names()
+)
+def product_handler(message):
+    product_name = message.text
+    product_description, product_price = get_product_data(product_name)
+
 
 @bot.message_handler(content_types=['text'])
 def random_message_handler(message):
