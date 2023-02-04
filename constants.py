@@ -39,5 +39,5 @@ def update_user_filed_sql(chat_id, filed_name, value):
 
 
 def get_product_data_sql(product_name):
-    sql = f"SELECT discription from products WHERE name = {product_name}"
+    sql = f"SELECT discription, price from products WHERE name = '{product_name}'"
     return sql

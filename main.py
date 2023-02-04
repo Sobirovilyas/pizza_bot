@@ -173,14 +173,37 @@ def back_handler(message):
     menu_to_go_back = stack.top() # fetch prev menu
     bot.send_message(message.chat.id, "Предидущее меню:", reply_markup=menu_to_go_back)
 
+
+def choose_amount_keyboard():
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True, row_width=3)
+
+    row1 = [KeyboardButton("1"), KeyboardButton("2"), KeyboardButton("3")]
+    row2 = [KeyboardButton("4"), KeyboardButton("5"), KeyboardButton("6")]
+    row3 = [KeyboardButton("7"), KeyboardButton("8"), KeyboardButton("9")]
+    row4 = KeyboardButton("<< Назад")
+
+    keyboard.add(*row1)
+    keyboard.add(*row2)
+    keyboard.add(*row3)
+    keyboard.add(row4)
+
+    return keyboard
+
 @bot.message_handler(
     func=lambda message: message.text in get_product_names()
 )
 def product_handler(message):
     product_name = message.text
     product_description, product_price = get_product_data(product_name)
-    reply_message = f"**Наименование блюда:** {product_name}\n"
-    reply_message += f"**Описание:** {product_description}"
+    reply_message = f"*Наименование блюда:* {product_name}\n"
+    reply_message += f"*Описание:* {product_description}\n"
+    reply_message += f"*Цена:* {product_price} сум"
+
+    stack.push(choose_amount_keyboard())
+    bot.send_message(message.chat.id,
+                     reply_message,
+                     parse_mode='MARKDOWN',
+                     reply_markup=choose_amount_keyboard())
 
 @bot.message_handler(content_types=['text'])
 def random_message_handler(message):
