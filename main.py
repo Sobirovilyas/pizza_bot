@@ -4,7 +4,8 @@ from telebot import TeleBot
 from telebot.types import KeyboardButton, ReplyKeyboardMarkup
 
 from constants import get_products_query, create_new_user_query
-from utils import MenuStack, check_phone_number, check_address, set_integer_flag, get_integer_flag, update_user_filed
+from utils import MenuStack, check_phone_number, check_address, set_integer_flag, get_integer_flag, update_user_filed, \
+    get_product_data
 
 TOKEN = '5943242364:AAEDa7ko4pgcCKnzSOw7WdvU8eYMH8OWD6M'
 
@@ -178,7 +179,8 @@ def back_handler(message):
 def product_handler(message):
     product_name = message.text
     product_description, product_price = get_product_data(product_name)
-
+    reply_message = f"**Наименование блюда:** {product_name}\n"
+    reply_message += f"**Описание:** {product_description}"
 
 @bot.message_handler(content_types=['text'])
 def random_message_handler(message):

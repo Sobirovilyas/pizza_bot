@@ -25,7 +25,11 @@ class MenuStack:
 
 
 from constants import (get_address_sql,
-                       get_phone_number_sql, set_integer_flag_sql, get_integer_flag_sql, update_user_filed_sql)
+                       get_phone_number_sql,
+                       set_integer_flag_sql,
+                       get_integer_flag_sql,
+                       update_user_filed_sql,
+                       get_product_data_sql)
 import sqlite3
 
 
@@ -91,6 +95,21 @@ def update_user_filed(chat_id, filed_name, value):
     cursor = conn.cursor()
     cursor.execute(sql)
     conn.commit()
+
+
+def get_product_data(product_name):
+    sql = get_product_data_sql(product_name)
+
+    conn = sqlite3.connect("pizza_database.db")
+    cursor = conn.cursor()
+    cursor.execute(sql)
+    conn.commit()
+
+    data = cursor.fetchone()
+    description = data[0]
+    price = data[1]
+
+    return description, price
 
 
 if __name__ == '__main__':
