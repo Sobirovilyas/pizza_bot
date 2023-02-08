@@ -8,7 +8,7 @@ from utils import MenuStack, check_phone_number, check_address, set_integer_flag
     get_product_data, start_getting_quantity, get_product_from_user, insert_data_to_basket, fetch_basket_data, \
     delete_item_from_basket
 
-TOKEN = '5943242364:AAEDa7ko4pgcCKnzSOw7WdvU8eYMH8OWD6M'
+TOKEN = '5976035632:AAFcPPnnLmdDx5LmnarM1ZWexJl7w2FiDcw'
 
 bot = TeleBot(TOKEN, parse_mode=None)
 
@@ -20,7 +20,7 @@ def main_menu_keyboard():
     :return: Объект класса ReplyKeyboardMarkup
     """
 
-    cart = KeyboardButton("Корзина")
+    cart = KeyboardButton("Корзинка")
     menu = KeyboardButton("Меню")
 
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
