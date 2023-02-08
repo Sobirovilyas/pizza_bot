@@ -29,7 +29,7 @@ from constants import (get_address_sql,
                        set_integer_flag_sql,
                        get_integer_flag_sql,
                        update_user_filed_sql,
-                       get_product_data_sql)
+                       get_product_data_sql, get_product_id_from_user_sql)
 import sqlite3
 
 
@@ -106,10 +106,43 @@ def get_product_data(product_name):
     conn.commit()
 
     data = cursor.fetchone()
-    description = data[0]
-    price = data[1]
+    id_ = data[0]
+    description = data[1]
+    price = data[2]
 
-    return description, price
+    return description, price, id_
+
+
+def start_getting_quantity(chat_id, product):
+    set_integer_flag(1, "quantity_being_entered", "user", chat_id)
+    data = get_product_data(product)
+    id_ = data[2]
+    update_user_filed(chat_id, "chose_product", id_)
+
+
+def get_product_from_user(chat_id):
+    sql = get_product_id_from_user_sql(chat_id)
+
+    conn = sqlite3.connect("pizza_database.db")
+    cursor = conn.cursor()
+    cursor.execute(sql)
+    conn.commit()
+
+    product_id = cursor.fetchone()[0]
+    return product_id
+
+
+def insert_data_to_basket(chat_id, product_id, amount):
+    sql = f"""INSERT INTO basket (
+                user_id, 
+                product_id, 
+                amount) 
+              VALUES ({chat_id}, {product_id}, {amount})"""
+
+    conn = sqlite3.connect("pizza_database.db")
+    cursor = conn.cursor()
+    cursor.execute(sql)
+    conn.commit()
 
 
 if __name__ == '__main__':
@@ -122,3 +155,4 @@ if __name__ == '__main__':
     popped = my_stack.pop()
     print("Popped element:", popped)
     print(my_stack)
+    print(my_stack.__dict__)

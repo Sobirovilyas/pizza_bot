@@ -5,7 +5,7 @@ from telebot.types import KeyboardButton, ReplyKeyboardMarkup
 
 from constants import get_products_query, create_new_user_query
 from utils import MenuStack, check_phone_number, check_address, set_integer_flag, get_integer_flag, update_user_filed, \
-    get_product_data
+    get_product_data, start_getting_quantity, get_product_from_user, insert_data_to_basket
 
 TOKEN = '5943242364:AAEDa7ko4pgcCKnzSOw7WdvU8eYMH8OWD6M'
 
@@ -111,7 +111,6 @@ def check_address_if_yes_update(chat_id, message):
     if get_integer_flag(column_name='address_being_entered',
                         table_name='user',
                         chat_id=chat_id) == 1:
-
         update_user_filed(chat_id, 'address', message.text)
         set_integer_flag(0, 'address_being_entered', 'user', chat_id)
         bot.send_message(chat_id, "Адрес сохранён.", reply_markup=get_user_details_keyboard(chat_id))
@@ -169,8 +168,8 @@ def menu_handler(message):
 
 @bot.message_handler(func=lambda message: message.text == '<< Назад')
 def back_handler(message):
-    stack.pop() # Delete this menu
-    menu_to_go_back = stack.top() # fetch prev menu
+    stack.pop()  # Delete this menu
+    menu_to_go_back = stack.top()  # fetch prev menu
     bot.send_message(message.chat.id, "Предидущее меню:", reply_markup=menu_to_go_back)
 
 
@@ -189,15 +188,18 @@ def choose_amount_keyboard():
 
     return keyboard
 
+
 @bot.message_handler(
     func=lambda message: message.text in get_product_names()
 )
 def product_handler(message):
     product_name = message.text
-    product_description, product_price = get_product_data(product_name)
+    product_description, product_price, id_ = get_product_data(product_name)
     reply_message = f"*Наименование блюда:* {product_name}\n"
     reply_message += f"*Описание:* {product_description}\n"
     reply_message += f"*Цена:* {product_price} сум"
+
+    start_getting_quantity(message.chat.id, product_name)
 
     stack.push(choose_amount_keyboard())
     bot.send_message(message.chat.id,
@@ -205,12 +207,31 @@ def product_handler(message):
                      parse_mode='MARKDOWN',
                      reply_markup=choose_amount_keyboard())
 
+
+def check_for_quantity(chat_id, message):
+    is_quantity = get_integer_flag("quantity_being_entered", "user", chat_id)
+    if is_quantity == 1:
+        if message.text.isnumeric() and int(message.text) > 0:
+            product_id = get_product_from_user(chat_id)
+            amount = int(message.text)
+            insert_data_to_basket(chat_id, product_id, amount)
+            bot.send_message(chat_id, "Добавлено в корзину!")
+            stack.pop()
+            keyboard = stack.top()
+            bot.send_message(chat_id, "Хотите что то ещё?", reply_markup=keyboard)
+        else:
+            bot.send_message(chat_id, "Количество может быть только "
+                                      "положительным числовым значением.")
+
+
 @bot.message_handler(content_types=['text'])
 def random_message_handler(message):
     chat_id = message.chat.id
     create_user(chat_id)
     check_phone_if_yes_update(chat_id, message)
     check_address_if_yes_update(chat_id, message)
+
+    check_for_quantity(chat_id, message)
 
 
 #
