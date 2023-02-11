@@ -171,6 +171,7 @@ def back_handler(message):
     stack.pop()  # Delete this menu
     menu_to_go_back = stack.top()  # fetch prev menu
     bot.send_message(message.chat.id, "Предидущее меню:", reply_markup=menu_to_go_back)
+    set_integer_flag(0, "quantity_being_entered", "user", message.chat.id)
 
 
 def choose_amount_keyboard():
@@ -219,9 +220,16 @@ def check_for_quantity(chat_id, message):
             stack.pop()
             keyboard = stack.top()
             bot.send_message(chat_id, "Хотите что то ещё?", reply_markup=keyboard)
+            set_integer_flag(0, "quantity_being_entered", "user", chat_id)
         else:
             bot.send_message(chat_id, "Количество может быть только "
                                       "положительным числовым значением.")
+
+@bot.message_handler(func=lambda message: message.text == "Корзина")
+def basket_handler(message):
+    # TODO get basket from db
+    # TODO send basket info to user
+    # change keyboard to basket keyboard
 
 
 @bot.message_handler(content_types=['text'])

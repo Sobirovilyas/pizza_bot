@@ -45,3 +45,10 @@ def get_product_data_sql(product_name):
 def get_product_id_from_user_sql(chat_id):
     sql = f"SELECT chose_product FROM user WHERE id = {chat_id}"
     return sql
+
+
+def get_basket_for_user(chat_id):
+    sql = f"""
+    SELECT * FROM basket
+    WHERE user_id = {chat_id}
+    """
