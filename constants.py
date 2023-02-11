@@ -49,6 +49,10 @@ def get_product_id_from_user_sql(chat_id):
 
 def get_basket_for_user(chat_id):
     sql = f"""
-    SELECT * FROM basket
+    SELECT products.name, basket.amount, products.price 
+    FROM basket 
+    JOIN products on basket.product_id = products.id
     WHERE user_id = {chat_id}
     """
+
+    return sql
