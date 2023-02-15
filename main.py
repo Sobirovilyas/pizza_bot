@@ -251,6 +251,7 @@ def basket_handler(message):
         return
 
     reply_message = create_basket_data_message(basket_data)
+    stack.push(basket_keyboard(basket_data))
     bot.send_message(message.chat.id,
                      reply_message,
                      parse_mode='MARKDOWN',
@@ -312,18 +313,34 @@ def order_keyboard():
                                            request_location=True)
     keyboard.add(share_contact_button)
     keyboard.add(share_location_button)
+    keyboard.add(KeyboardButton("<< Назад"))
 
     return keyboard
 
 @bot.message_handler(func=lambda message: message.text == "Заказать")
 def order_message_handler(message):
 
+    stack.push(order_keyboard())
     bot.send_message(message.chat.id,
                      "Введите локацию и номер телефона:",
                      reply_markup=order_keyboard())
 
 
-@bot.message_handler(content_types=['text'])
+def check_for_order_being_entered(message):
+
+    order_flag = get_integer_flag("order_being_made", "user", message.chat.id)
+    if order_flag == 1:
+        if message.content_type == 'contact':
+            phone_number = message.contact.phone_number
+            phone_number = phone_number[1:]
+            phone_number = int(phone_number)
+            update_user_filed(message.chat.id, "phone_number", phone_number)
+        if message.content_type == 'location':
+            location = message.location
+            location = (location.latitude, location.longitude)
+            update_user_filed(message.chat.id, "address", str(location))
+
+@bot.message_handler(content_types=['text', 'contact', 'location'])
 def random_message_handler(message):
     chat_id = message.chat.id
     create_user(chat_id)
@@ -331,6 +348,7 @@ def random_message_handler(message):
     check_address_if_yes_update(chat_id, message)
 
     check_for_quantity(chat_id, message)
+    check_for_order_being_entered(message)
 
 
 #
