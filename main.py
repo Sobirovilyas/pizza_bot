@@ -246,18 +246,26 @@ def basket_keyboard(basket_data):
 def basket_handler(message):
     basket_data = fetch_basket_data(chat_id=message.chat.id)
 
+    if len(basket_data) == 0:
+        bot.send_message(message.chat.id, "Корзина пуста")
+        return
+
+    reply_message = create_basket_data_message(basket_data)
+    bot.send_message(message.chat.id,
+                     reply_message,
+                     parse_mode='MARKDOWN',
+                     reply_markup=basket_keyboard(basket_data))
+    # change keyboard to basket keyboard
+
+
+def create_basket_data_message(basket_data):
     reply_message = ""
     total_price = 0
     for name, amount, price, _ in basket_data:
         reply_message += f"*{name}* - *{amount}* штук по *{price}* сум\n"
         total_price += price * amount
     reply_message += f"Общая сумма = *{total_price}*"
-
-    bot.send_message(message.chat.id,
-                     reply_message,
-                     parse_mode='MARKDOWN',
-                     reply_markup=basket_keyboard(basket_data))
-    # change keyboard to basket keyboard
+    return reply_message
 
 
 @bot.message_handler(
@@ -280,10 +288,39 @@ def delete_product_handler(message):
     delete_item_from_basket(message.chat.id, name, amount)
 
     basket_data = fetch_basket_data(message.chat.id)
+    if len(basket_data) == 0:
+        stack.pop()
+        bot.send_message(message.chat.id,
+                         "Корзина пуста!",
+                         reply_markup=stack.top())
+        return
     bot.send_message(message.chat.id,
                      "Продукт удалён из корзины!",
                      reply_markup=basket_keyboard(basket_data)
                      )
+    reply_message = create_basket_data_message(basket_data)
+    bot.send_message(message.chat.id, reply_message, parse_mode='MARKDOWN')
+
+
+def order_keyboard():
+
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
+
+    share_contact_button = KeyboardButton("Поделитеcь номером телефона",
+                                          request_contact=True)
+    share_location_button = KeyboardButton("Отправить локацию",
+                                           request_location=True)
+    keyboard.add(share_contact_button)
+    keyboard.add(share_location_button)
+
+    return keyboard
+
+@bot.message_handler(func=lambda message: message.text == "Заказать")
+def order_message_handler(message):
+
+    bot.send_message(message.chat.id,
+                     "Введите локацию и номер телефона:",
+                     reply_markup=order_keyboard())
 
 
 @bot.message_handler(content_types=['text'])
