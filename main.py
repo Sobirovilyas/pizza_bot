@@ -6,7 +6,7 @@ from telebot.types import KeyboardButton, ReplyKeyboardMarkup
 from constants import get_products_query, create_new_user_query
 from utils import MenuStack, check_phone_number, check_address, set_integer_flag, get_integer_flag, update_user_filed, \
     get_product_data, start_getting_quantity, get_product_from_user, insert_data_to_basket, fetch_basket_data, \
-    delete_item_from_basket
+    delete_item_from_basket, move_products_from_basket_to_order
 
 TOKEN = '5976035632:AAFcPPnnLmdDx5LmnarM1ZWexJl7w2FiDcw'
 
@@ -20,7 +20,7 @@ def main_menu_keyboard():
     :return: Объект класса ReplyKeyboardMarkup
     """
 
-    cart = KeyboardButton("Корзинка")
+    cart = KeyboardButton("Корзина")
     menu = KeyboardButton("Меню")
 
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
@@ -324,6 +324,7 @@ def order_message_handler(message):
     bot.send_message(message.chat.id,
                      "Введите локацию и номер телефона:",
                      reply_markup=order_keyboard())
+    set_integer_flag(1, "order_being_made", "user", message.chat.id)
 
 
 def check_for_order_being_entered(message):
@@ -339,7 +340,10 @@ def check_for_order_being_entered(message):
             location = message.location
             location = (location.latitude, location.longitude)
             update_user_filed(message.chat.id, "address", str(location))
-
+            set_integer_flag(0, "order_being_made", "user", message.chat.id)
+            move_products_from_basket_to_order(message.chat.id)
+            #clear_basket(message.chat_id)
+            bot.send_message(message.chat.id, "Ваш заказ успешно принят!")
 @bot.message_handler(content_types=['text', 'contact', 'location'])
 def random_message_handler(message):
     chat_id = message.chat.id

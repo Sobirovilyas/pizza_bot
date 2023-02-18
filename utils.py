@@ -30,7 +30,7 @@ from constants import (get_address_sql,
                        get_integer_flag_sql,
                        update_user_filed_sql,
                        get_product_data_sql, get_product_id_from_user_sql, get_basket_for_user,
-                       delete_product_from_basket)
+                       delete_product_from_basket, create_order_sql, get_order_id)
 import sqlite3
 
 
@@ -164,6 +164,34 @@ def delete_item_from_basket(chat_id, product_name, amount):
     cursor.execute(sql)
     conn.commit()
 
+
+
+def move_products_from_basket_to_order(chat_id, basket_data=None):
+    basket_data = fetch_basket_data(chat_id)
+
+    order_id_sql = create_order_sql(chat_id)
+
+    conn = sqlite3.connect("pizza_database.db")
+    cursor = conn.cursor()
+    cursor.execute(order_id_sql)
+    conn.commit()
+
+    order_id_sql = get_order_id(chat_id)
+    conn = sqlite3.connect("pizza_database.db")
+    cursor = conn.cursor()
+    cursor.execute(order_id_sql)
+    conn.commit()
+    order_id = cursor.fetchone()[0]
+
+    sql = """
+    INSERT INTO order_product (order_id, product_id, amount)
+    VALUES (?, ?, ? ) 
+    """
+    order_product_pairs = []
+    for _, amount, _, product_id in basket_data:
+            order_product_pairs.append((order_id, product_id, amount))
+    cursor.executemany(sql, order_product_pairs)
+    conn.commit()
 
 if __name__ == '__main__':
     my_stack = MenuStack(9)
